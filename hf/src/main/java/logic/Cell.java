@@ -1,4 +1,4 @@
-package main.logic;
+package logic;
 
 //stores if it is alive or dead
 public class Cell {
@@ -11,7 +11,7 @@ public class Cell {
 
     //parameterless constructor, defaults to dead state
     public Cell(){
-        this.Cell(false);
+        this(false);
     }
 
     //constructor with randomized state
@@ -26,5 +26,10 @@ public class Cell {
     //state getter
     public boolean isAlive(){
         return isAlive;
+    }
+
+    //state setter
+    public void setAlive(boolean state){
+        isAlive = state;
     }
 }
