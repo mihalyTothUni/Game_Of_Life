@@ -23,7 +23,7 @@ public class GameField {
         this(dimX, dimY);
         for(int i = 0; i < dimX; i++){
             for (int j = 0; j < dimY; j++) {
-                map[dimX][dimY] = new Cell(percentage);
+                map[i][j] = new Cell(percentage);
             }
         }
     }
@@ -44,5 +44,31 @@ public class GameField {
             return;
         }
         map[coords.getX()][coords.getY()].setAlive(state);
+    }
+
+
+    // Getters and Setters for Jackson
+    public int getDimX() {
+        return dimX;
+    }
+
+    public void setDimX(int dimX) {
+        this.dimX = dimX;
+    }
+
+    public int getDimY() {
+        return dimY;
+    }
+
+    public void setDimY(int dimY) {
+        this.dimY = dimY;
+    }
+
+    public Cell[][] getMap() {
+        return map;
+    }
+
+    public void setMap(Cell[][] field) {
+        this.map = field;
     }
 }

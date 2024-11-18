@@ -34,7 +34,7 @@ public class SessionRules {
 
         gameRules = conway;
         cellShape = shapeList.SQUARE;
-        popPrecent = 0;
+        popPrecent = 50;
         dimX = 50;
         dimY = 100;
         
@@ -55,6 +55,43 @@ public class SessionRules {
     //gets the shape of the cells
     public shapeList getShape(){
         return cellShape;
+    }
+
+    
+
+    // Getters and Setters for Jackson
+    public int getDimX() {
+        return dimX;
+    }
+
+    public void setDimX(int dimX) {
+        this.dimX = dimX;
+    }
+
+    public int getDimY() {
+        return dimY;
+    }
+
+    public void setDimY(int dimY) {
+        this.dimY = dimY;
+    }
+
+    public int getPopPrecent() {
+        return popPrecent;
+    }
+
+    public void setPopPrecent(int popPrecent) {
+        this.popPrecent = popPrecent;
+    }
+
+    //getter alread defined
+    public void setShape(shapeList shape){
+        cellShape = shape;
+    }
+    
+    //getter already defined
+    public void setRules(Map<String, Integer> gameRules) {
+        this.gameRules = gameRules;
     }
 
     

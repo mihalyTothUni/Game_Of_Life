@@ -80,7 +80,7 @@ public class Simulation {
     }    
 
 
-    //puts all neighbors in a list
+    //puts all coordinates of neighbors in a list
     //even some invalid ones, but those will count as dead anyway
     List<Coordinates> findNeighbors(Coordinates coords){
         ArrayList<Coordinates> result = new ArrayList<>();
@@ -113,7 +113,7 @@ public class Simulation {
                 result.add(new Coordinates(coords.getX(), coords.getY() + 1));
                 result.add(new Coordinates(coords.getX() - 1, coords.getY()));
                 result.add(new Coordinates(coords.getX() + 1, coords.getY()));
-
+                //even-odd neighbors
                 if(coords.getY() % 2 == 0){
                     result.add(new Coordinates(coords.getX() - 1, coords.getY() - 1));
                     result.add(new Coordinates(coords.getX() - 1, coords.getY() + 1));
@@ -139,5 +139,33 @@ public class Simulation {
         }
 
         return result;
+    }
+
+    // Default constructor for Jackson
+    public Simulation() {
+    }
+    // Getters and Setters for Jackson
+    public GameField getCurrentField() {
+        return currentField;
+    }
+
+    public void setCurrentField(GameField currentField) {
+        this.currentField = currentField;
+    }
+
+    public GameField getNextField() {
+        return nextField;
+    }
+
+    public void setNextField(GameField nextField) {
+        this.nextField = nextField;
+    }
+
+    public SessionRules getRuleset() {
+        return ruleset;
+    }
+
+    public void setRuleset(SessionRules ruleset) {
+        this.ruleset = ruleset;
     }
 }
