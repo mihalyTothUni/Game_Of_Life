@@ -9,7 +9,7 @@ import java.io.IOException;
 
 
 
-//used for serializing to barely readable JSON files
+//used for serializing entire simulations to barely readable JSON files
 public class SimulationJSON {
     private final ObjectMapper objectMapper;
 
@@ -23,7 +23,7 @@ public class SimulationJSON {
      * @param filePath The path where to save the JSON file
      * @throws IOException If there's an error writing the file
      */
-    public void saveToJSON(Simulation simulation, String filePath) throws IOException {
+    public void serialize(Simulation simulation, String filePath) throws IOException {
         objectMapper.writeValue(new File(filePath), simulation);
     }
 
@@ -33,7 +33,7 @@ public class SimulationJSON {
      * @return The deserialized Simulation object
      * @throws IOException If there's an error reading the file
      */
-    public Simulation loadFromJSON(String filePath) throws IOException {
+    public Simulation deserialize(String filePath) throws IOException {
         return objectMapper.readValue(new File(filePath), Simulation.class);
     }
 }

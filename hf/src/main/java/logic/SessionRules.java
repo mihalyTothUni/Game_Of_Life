@@ -25,7 +25,7 @@ public class SessionRules {
         this.dimY = dimY;
     }
 
-    //sets classic Conway rules and a blank 50x100 field
+    //sets classic Conway rules and a 50x100 field
     public SessionRules(){
         Map<String, Integer> conway = new HashMap<>();
         conway.put("minLive", 2);
@@ -34,7 +34,7 @@ public class SessionRules {
 
         gameRules = conway;
         cellShape = shapeList.SQUARE;
-        popPrecent = 50;
+        popPrecent = 0;
         dimX = 50;
         dimY = 100;
         

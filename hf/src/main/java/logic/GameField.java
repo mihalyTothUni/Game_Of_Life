@@ -11,6 +11,11 @@ public class GameField {
         this.dimX = dimX;
         this.dimY = dimY;
         map = new Cell[dimX][dimY];
+        for(int i = 0; i < dimX; i++){
+            for (int j = 0; j < dimY; j++) {
+                map[i][j] = new Cell();
+            }
+        }
     }
 
     //constructor with no parameters, sets default values
@@ -70,5 +75,14 @@ public class GameField {
 
     public void setMap(Cell[][] field) {
         this.map = field;
+    }
+    
+    //clears the field
+    public void clear() {
+        for(int i = 0; i < dimX; i++){
+            for (int j = 0; j < dimY; j++) {
+                map[i][j].setAlive(false);
+            }
+        }
     }
 }

@@ -4,13 +4,19 @@ package logic;
 import java.util.ArrayList;
 import java.util.List;
 
+import logic.SessionRules.shapeList;
+
 public class Simulation {
     GameField currentField;
     GameField nextField;
     SessionRules ruleset;
+    volatile boolean running = false;
+    Thread thread;
+    List<SimulationObserver> observers;
 
     //sets up the simulation based on the provided rules
     public Simulation(SessionRules rules){
+        
         ruleset = rules;
         if(ruleset.popPrecent == 0){
             currentField = new GameField(ruleset.dimX, ruleset.dimY);
@@ -19,6 +25,33 @@ public class Simulation {
             currentField = new GameField(ruleset.dimX, ruleset.dimY, ruleset.popPrecent);
         }
         nextField = new GameField(ruleset.dimX, ruleset.dimY);
+        
+        observers = new ArrayList<>();
+
+        //thread for running the simulation, will be paused until start() is called
+        thread = new Thread(() -> {
+            while(true){
+              synchronized (this) {
+                while (!running) {
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } 
+                }
+                }
+                tick();
+                try {
+                    Thread.sleep(100); // Adjust the sleep time as needed
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }  
+            }
+            
+
+        });
+
+        thread.start();
     }
 
     //calculate next state of entire field
@@ -26,8 +59,7 @@ public class Simulation {
         for(int x = 0; x < currentField.dimX; x++){
             for (int y = 0; y < currentField.dimY; y++){
                 Coordinates currentCell = new Coordinates(x, y);
-                boolean state;
-                state = calculateAlive(currentCell);
+                boolean state = calculateAlive(currentCell);
                 nextField.set(currentCell, state);
             }
         }
@@ -40,10 +72,40 @@ public class Simulation {
         nextField = tmp;
     }
 
-    //advance simulation by one step
+    //advance simulation by one step and notify observers
     void tick(){
+        System.out.println("tick "+ getShape());
         nextState();
         switchFields();
+        notifyObservers();
+    }
+
+    //add an observer to the simulation
+    public void addObserver(SimulationObserver observer){
+        observers.add(observer);
+    }
+
+    void notifyObservers(){
+        for(SimulationObserver observer : observers){
+            observer.onSimulationTick();
+        }
+    }
+
+    //start simulation thread
+    public synchronized void  start(){
+        running = true;
+        notifyAll();        
+    }
+
+    //pause simulation (will halt at next tick)
+    public synchronized void pause(){
+        running = false;
+        
+    }
+
+    //check if simulation is running
+    public boolean isRunning(){
+        return running;
     }
 
 
@@ -148,9 +210,10 @@ public class Simulation {
     public GameField getCurrentField() {
         return currentField;
     }
-
+    //Random populater method uses this too
     public void setCurrentField(GameField currentField) {
         this.currentField = currentField;
+        notifyObservers();
     }
 
     public GameField getNextField() {
@@ -168,4 +231,22 @@ public class Simulation {
     public void setRuleset(SessionRules ruleset) {
         this.ruleset = ruleset;
     }
+    //clears both current and next field
+    public void clear() {
+        currentField.clear();
+        nextField.clear();
+        
+        notifyObservers();
+    }
+    //set the cell shape
+	public void setShape(shapeList selectedShape) {
+        ruleset.cellShape = selectedShape;
+        //notify observers of change
+        notifyObservers();
+    }
+    //get the cell shape
+    public shapeList getShape() {
+        return ruleset.cellShape;
+    }
+    
 }
