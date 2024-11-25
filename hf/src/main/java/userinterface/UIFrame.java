@@ -43,6 +43,7 @@ public class UIFrame {
         
     static final String SIM_SAVEPATH = "hf/resources/simulations/";
     static final String RULE_SAVEPATH = "hf/resources/rules/";
+    static final int CELL_SIZE = 10;
     
     
     public UIFrame(int width, int height, Simulation simulation){
@@ -158,7 +159,7 @@ public class UIFrame {
         controlPanel.add(bottomRow);
 
         // Create a panel for the game board
-        JPanel gameBoard = new GameUI(simulation, 10);
+        JPanel gameBoard = new GameUI(simulation, CELL_SIZE);
         gameBoard.setBackground(Color.BLACK);
         gameBoard.setLayout(new BorderLayout());
 

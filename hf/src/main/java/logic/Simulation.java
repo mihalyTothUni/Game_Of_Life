@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import logic.SessionRules.shapeList;
 
 public class Simulation {
+    static final int TICKSPEED = 10;
     GameField currentField;
     GameField nextField;
     SessionRules ruleset;
@@ -45,7 +46,7 @@ public class Simulation {
                 }
                 tick();
                 try {
-                    Thread.sleep(300); // Adjust the sleep time as needed
+                    Thread.sleep(1000 / TICKSPEED);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }  
@@ -171,20 +172,19 @@ public class Simulation {
                 result.add(new Coordinates(coords.getX() - 1, coords.getY()));
                 result.add(new Coordinates(coords.getX() + 1, coords.getY()));
                 //triangles are alternating facing up and down
-                if((coords.getY() + coords.getX()) % 2 != 0){
+                boolean isUpward = (coords.getY() + coords.getX()) % 2 != 0;
+                if(isUpward){
+                    // Points up, adjacent to one below it
+                    result.add(new Coordinates(coords.getX(), coords.getY() + 1));
+                }else{
                     // Points down, adjacent to one above it
                     result.add(new Coordinates(coords.getX(), coords.getY() - 1));
-
-                }else{
-                    // Point up, adjacent to one below it
-                    result.add(new Coordinates(coords.getX(), coords.getY() + 1));
-
                 }
                 break;
 
             case HEXAGON:
-                //odd rows are shifted half a hexagon inwards and then mapped to grid
-                //only counting neighbors by edges and not vertices here, too
+                // Odd rows are shifted half a hexagon to the right and then mapped to grid
+                // Only counting neighbors by adjacent edges here, too
                 
                 //common neighbors
                 result.add(new Coordinates(coords.getX(), coords.getY() - 1));
@@ -197,7 +197,7 @@ public class Simulation {
                     result.add(new Coordinates(coords.getX() - 1, coords.getY() + 1));
                 }else{
                     result.add(new Coordinates(coords.getX() + 1, coords.getY() + 1));
-                    result.add(new Coordinates(coords.getX() + 1, coords.getY() + 1));
+                    result.add(new Coordinates(coords.getX() + 1, coords.getY() - 1));
                 }
                 break;
 

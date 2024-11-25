@@ -22,7 +22,7 @@ public class Main {
         
 
         //TODO hexagons are completely screwed
-        //they aint even pointy up like they should be
+        //they aint even pointy up like they should be yes they are
 
         //TODO refactor to javadoc and cleaner code
         

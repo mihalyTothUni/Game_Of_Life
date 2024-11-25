@@ -10,7 +10,6 @@ import java.awt.event.MouseEvent;
 
 import logic.Coordinates;
 import logic.GameField;
-import logic.SessionRules.shapeList;
 import logic.Simulation;
 import logic.SimulationObserver;
 
@@ -23,6 +22,10 @@ public class GameUI extends JPanel implements SimulationObserver {
     int cellSize; // Size of each cell
     GameField currentField; // The field we want to draw
 
+    HexUI hexManager; // Helper class because hexagons are hard
+    SquareUI squareManager;  // Turns out squares aren't easy either
+    TriUI triManager;   // Dont get me started on these things
+
     public GameUI(Simulation simulation, int cellSize) {
         this.simulation = simulation;
         this.cellSize = cellSize;
@@ -30,15 +33,17 @@ public class GameUI extends JPanel implements SimulationObserver {
         this.rows = currentField.getDimY();
         this.cols = currentField.getDimX();
 
-        setPreferredSize(new Dimension(cols * cellSize, rows * cellSize));
+        squareManager = new SquareUI(rows, cols, cellSize);
+        triManager = new TriUI(rows, cols, cellSize);
+        hexManager = new HexUI(rows, cols, cellSize);
+
         setBackground(Color.BLACK);
 
         // Add a mouse listener to handle clicks
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                
-                handleCellClick(e.getX(), e.getY());
+                handleCellClick(e.getPoint());
             }
         });
 
@@ -66,52 +71,27 @@ public class GameUI extends JPanel implements SimulationObserver {
     }
 
     // Handle cell clicks
-    private void handleCellClick(int mouseX, int mouseY) {
-        int row = 0;
-        int col = 0;
+    private void handleCellClick(Point point) {
+        Coordinates selection = new Coordinates(-1, -1);
 
         // Calculate row and col based on cell shape
         switch (simulation.getShape()) {
             case SQUARE:
-                row = mouseY / cellSize;
-                col = mouseX / cellSize;
+                selection = squareManager.detectCellClick(point);
                 break;
             case TRIANGLE:
-                row = mouseY / cellSize;
-                col = mouseX / cellSize;
-                // Adjust for triangle alternation
-                if ((row + col) % 2 != 0) {
-                    // Handle odd/even positioning if needed
-                }
+                selection = triManager.detectCellClick(point);
                 break;
             case HEXAGON:
-            double hexHeight = cellSize * Math.sqrt(3) / 2;
-            row = (int) (mouseY / hexHeight);
-            col = (int) (mouseX / (cellSize * 0.75));
-            double xOffset = mouseX - (col * cellSize * 0.75);
-            double yOffset = mouseY - (row * hexHeight);
-            if (col % 2 == 0) {
-                if (yOffset < (-hexHeight / cellSize) * xOffset + hexHeight) {
-                    row--;
-                    col--;
-                } else if (yOffset < (hexHeight / cellSize) * xOffset - hexHeight) {
-                    row--;
-                }
-            } else {
-                if (yOffset < (hexHeight / cellSize) * xOffset) {
-                    row--;
-                } else if (yOffset < (-hexHeight / cellSize) * xOffset + hexHeight) {
-                    col--;
-                }
-            }
+                selection = hexManager.detectCellClick(point);
             break;
         }
 
         // Ensure the calculated row and col are within bounds
+        int row = selection.getY();
+        int col = selection.getX();
         if (row >= 0 && row < rows && col >= 0 && col < cols) {
-            Coordinates coords = new Coordinates(col, row);
-            currentField.set(coords, !currentField.get(coords)); // Toggle cell state
-            System.out.println("click at " + coords.getX() + ";" + coords.getY());
+            currentField.set(selection, !currentField.get(selection)); // Toggle cell state
             repaint();
         }
     }
@@ -122,23 +102,18 @@ public class GameUI extends JPanel implements SimulationObserver {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setColor(Color.WHITE);
 
-        for (int row = 0; row < rows; row++) {
-            for (int col = 0; col < cols; col++) {
-                if (currentField.get(new Coordinates(col, row))) { // Draw only active cells
-                    switch (simulation.getShape()) {
-                        case SQUARE:
-                            drawSquareCell(g2d, row, col);
-                            break;
-                        case TRIANGLE:
-                            drawTriangleCell(g2d, row, col);
-                            break;
-                        case HEXAGON:
-                            drawHexagonCell(g2d, row, col);
-                            break;
-                    }
-                }
-            }
+        switch (simulation.getShape()) {
+            case SQUARE:
+                squareManager.drawGrid(g2d, currentField);
+                break;
+            case TRIANGLE:
+                triManager.drawGrid(g2d, currentField);
+                break;
+            case HEXAGON:
+                hexManager.drawGrid(g2d, currentField);
+                break;
         }
+        
     }
 
     private void drawSquareCell(Graphics2D g2d, int row, int col) {
@@ -169,6 +144,7 @@ public class GameUI extends JPanel implements SimulationObserver {
         g2d.fillPolygon(triangle);
     }
     //TODO still a bit scuffed
+    /* 
     private void drawHexagonCell(Graphics2D g2d, int row, int col) {
         int hexaSize = cellSize * 3 / 2;
         int x = col * hexaSize; // Horizontal spacing
@@ -183,7 +159,7 @@ public class GameUI extends JPanel implements SimulationObserver {
             hexagon.addPoint(xOffset, yOffset);
         }
         g2d.fillPolygon(hexagon);
-    }
+    }*/
 
     
 }
