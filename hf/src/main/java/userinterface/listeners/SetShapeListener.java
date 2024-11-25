@@ -1,4 +1,4 @@
-package userinterface;
+package userinterface.listeners;
 
 import java.awt.event.ActionEvent;
 
@@ -21,7 +21,7 @@ public class SetShapeListener extends Listener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        simulation.setShape(shapeSelector.getItemAt(shapeSelector.getSelectedIndex()));
+        simulation.setShape((shapeList) shapeSelector.getSelectedItem());
     }
 
     

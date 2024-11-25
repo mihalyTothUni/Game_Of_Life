@@ -1,4 +1,4 @@
-package userinterface;
+package userinterface.listeners;
 
 import java.awt.event.ActionListener;
 

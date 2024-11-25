@@ -4,6 +4,7 @@ import javax.swing.*;
 
 import logic.Simulation;
 import logic.SessionRules.shapeList;
+import userinterface.listeners.*;
 
 import java.awt.*;
 
@@ -13,17 +14,25 @@ public class UIFrame {
 
     JButton startPauseButton;
     JButton clearButton;
-    JButton saveButton;
+
+    JButton saveSimButton;
+    JButton loadSimButton;
+
     JButton setShapeButton;
     JButton populateButton;
+
     JButton applyRulesButton;
     JButton saveRulesButton;
+    JButton loadRulesButton;
 
-    JTextField fileNameField;
+    
     JTextField presetNameField;
+    JTextField simNameField;
 
     JComboBox<shapeList> shapeDropdown;
-    JComboBox<String> presetDropdown;
+
+    FileSelector presetDropdown;
+    FileSelector simDropdown;
     
     JSpinner popDensitySpinner;
     JSpinner minLiveSpinner;
@@ -31,11 +40,13 @@ public class UIFrame {
     JSpinner spawnSpinner;
     
     
+        
+    static final String SIM_SAVEPATH = "hf/resources/simulations/";
+    static final String RULE_SAVEPATH = "hf/resources/rules/";
     
-
-
+    
     public UIFrame(int width, int height, Simulation simulation){
-
+    
         this.simulation = simulation;
         // Create the main frame
         JFrame frame = new JFrame("Game of Life");
@@ -55,43 +66,66 @@ public class UIFrame {
         new StartPauseListener(simulation, startPauseButton);
         clearButton = new JButton("Clear");
         new ClearListener(simulation, clearButton);
-        fileNameField = new JTextField(10); // 10 columns for width
-        saveButton = new JButton("Save");
+
+        simNameField = new JTextField(10); // 10 columns for width
+        saveSimButton = new JButton("Save");
+        new SimSaveListener(simulation, simNameField, saveSimButton, SIM_SAVEPATH);
+
+        simDropdown = new FileSelector(SIM_SAVEPATH);
+        loadSimButton = new JButton("Load");
+        new SimLoadListener(simulation, simDropdown, loadSimButton, SIM_SAVEPATH);
+
         shapeList[] cellShape = {shapeList.SQUARE, shapeList.TRIANGLE, shapeList.HEXAGON};
         shapeDropdown = new JComboBox<>(cellShape);
         setShapeButton = new JButton("Set");
         new SetShapeListener(simulation, setShapeButton, shapeDropdown);
-        populateButton = new JButton("Populate");
-        popDensitySpinner = new JSpinner(new SpinnerNumberModel(0, 0, 100, 5));
-        
 
+        popDensitySpinner = new JSpinner(new SpinnerNumberModel(0, 0, 100, 5));
+        populateButton = new JButton("Populate");
+        new PopulateListener(simulation, popDensitySpinner, populateButton);
+        
+        // Adding previously created elements to UI
         topRow.add(startPauseButton);
         topRow.add(clearButton);
-        topRow.add(new JLabel("File Name:"));
-        topRow.add(fileNameField);
-        topRow.add(saveButton);
+
+        topRow.add(new JLabel("Load sim:"));
+        topRow.add(simDropdown);
+        topRow.add(loadSimButton);
+
+        topRow.add(new JLabel("Save as:"));
+        topRow.add(simNameField);
+        topRow.add(saveSimButton);
+
         topRow.add(new JLabel("Cell shape:"));
         topRow.add(shapeDropdown);
         topRow.add(setShapeButton);
+
         topRow.add(new JLabel("Density:"));
         topRow.add(popDensitySpinner);
         topRow.add(populateButton);
-        new PopulateListener(simulation, popDensitySpinner, populateButton);
+        
 
         // Create the second row of controls
         JPanel bottomRow = new JPanel();
         bottomRow.setLayout(new FlowLayout(FlowLayout.CENTER));
 
-        presetDropdown = new JComboBox<>(new String[]{"Preset 1", "Preset 2", "Preset 3"});
         minLiveSpinner = new JSpinner(new SpinnerNumberModel(1, 0, 10, 1)); // min=0, max=10, step=1
         maxLiveSpinner = new JSpinner(new SpinnerNumberModel(3, 0, 10, 1));
         spawnSpinner = new JSpinner(new SpinnerNumberModel(2, 0, 10, 1));
         applyRulesButton = new JButton("Apply");
+        new SetRulesListener(simulation, minLiveSpinner, maxLiveSpinner, spawnSpinner, applyRulesButton);
+        
+        presetDropdown = new FileSelector(RULE_SAVEPATH);
+        loadRulesButton = new JButton("Load");
+        new RuleLoadListener(simulation, presetDropdown, minLiveSpinner, maxLiveSpinner, spawnSpinner, loadRulesButton, RULE_SAVEPATH);
+        
         presetNameField = new JTextField(10);
-        saveRulesButton = new JButton("Save preset");
+        saveRulesButton = new JButton("Save ruleset");
+        new RuleSaveListener(simulation, presetNameField, saveRulesButton, RULE_SAVEPATH);
 
         bottomRow.add(new JLabel("Preset:"));
         bottomRow.add(presetDropdown);
+        bottomRow.add(loadRulesButton);
         bottomRow.add(new JLabel("Min Live:"));
         bottomRow.add(minLiveSpinner);
         bottomRow.add(new JLabel("Max Live:"));
@@ -99,7 +133,7 @@ public class UIFrame {
         bottomRow.add(new JLabel("Spawn:"));
         bottomRow.add(spawnSpinner);
         bottomRow.add(applyRulesButton);
-        new SetRulesListener(simulation, minLiveSpinner, maxLiveSpinner, spawnSpinner, applyRulesButton);
+        
         bottomRow.add(presetNameField);
         bottomRow.add(saveRulesButton);
 

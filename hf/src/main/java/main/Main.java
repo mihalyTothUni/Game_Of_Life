@@ -21,12 +21,12 @@ public class Main {
         //TODO implement save AND ADD LOAD OPTION for sims
 
 
-        //TODO implement preset saving and loading
-
         //TODO triangles seem funky, look into it
 
         //TODO hexagons are completely screwed
         //they aint even pointy up like they should be
+
+        //TODO refactor to javadoc and cleaner code
         
         
             

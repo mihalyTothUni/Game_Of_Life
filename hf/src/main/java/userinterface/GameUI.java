@@ -2,6 +2,7 @@ package userinterface;
 
 import javax.swing.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -14,12 +15,13 @@ import logic.Simulation;
 import logic.SimulationObserver;
 
 //GameUI class for the user interface of the actual cell grid
+@JsonIgnoreType
 public class GameUI extends JPanel implements SimulationObserver {
-    transient Simulation simulation; // The simulation we are drawing
+    Simulation simulation; // The simulation we are drawing
     int rows; // Number of rows
     int cols; // Number of columns
     int cellSize; // Size of each cell
-    transient GameField currentField; // The field we want to draw
+    GameField currentField; // The field we want to draw
 
     public GameUI(Simulation simulation, int cellSize) {
         this.simulation = simulation;

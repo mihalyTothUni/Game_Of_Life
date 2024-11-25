@@ -4,6 +4,8 @@ package logic;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import logic.SessionRules.shapeList;
 
 public class Simulation {
@@ -12,7 +14,8 @@ public class Simulation {
     SessionRules ruleset;
     volatile boolean running = false;
     Thread thread;
-    List<SimulationObserver> observers;
+    @JsonIgnore
+    private List<SimulationObserver> observers;
 
     //sets up the simulation based on the provided rules
     public Simulation(SessionRules rules){
@@ -80,12 +83,23 @@ public class Simulation {
         notifyObservers();
     }
 
+
+    // Ensure observers list is initialized
+    private void ensureObserversInitialized() {
+        if (observers == null) {
+            observers = new ArrayList<>();
+    }
+}
+
     //add an observer to the simulation
     public void addObserver(SimulationObserver observer){
+        ensureObserversInitialized();
         observers.add(observer);
+        notifyObservers();
     }
 
     void notifyObservers(){
+        ensureObserversInitialized();
         for(SimulationObserver observer : observers){
             observer.onSimulationTick();
         }
@@ -205,6 +219,30 @@ public class Simulation {
 
     // Default constructor for Jackson
     public Simulation() {
+        observers = new ArrayList<>();
+        thread = new Thread(() -> {
+            while(true){
+              synchronized (this) {
+                while (!running) {
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } 
+                }
+                }
+                tick();
+                try {
+                    Thread.sleep(100); // Adjust the sleep time as needed
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }  
+            }
+            
+
+        });
+
+        thread.start();
     }
     // Getters and Setters for Jackson
     public GameField getCurrentField() {
@@ -247,6 +285,10 @@ public class Simulation {
     //get the cell shape
     public shapeList getShape() {
         return ruleset.cellShape;
+    }
+    //get the current observers
+    public List<SimulationObserver> getObservers() {
+        return observers;
     }
     
 }
