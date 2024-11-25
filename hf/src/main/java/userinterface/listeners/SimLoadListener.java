@@ -9,6 +9,7 @@ import javax.swing.JButton;
 import logic.Simulation;
 import logic.SimulationObserver;
 import userinterface.FileSelector;
+import userinterface.GameUI;
 import io.SimulationJSON;
 
 public class SimLoadListener extends Listener{
@@ -16,6 +17,8 @@ public class SimLoadListener extends Listener{
     FileSelector fileSelector;
     JButton loadButton;
     String directory;
+    Simulation loadedSimulation;
+    GameUI ui;
 
     public SimLoadListener(Simulation simulation, FileSelector fileSelector, JButton loadButton, String directory){
         super(simulation);
@@ -31,19 +34,17 @@ public class SimLoadListener extends Listener{
 
         String selectedFile = directory;
         selectedFile = selectedFile.concat((String) fileSelector.getSelectedItem());
-        List<SimulationObserver> currentObservers = simulation.getObservers();
+        
         
         if(!selectedFile.isEmpty()){
             SimulationJSON ser = new SimulationJSON();
             try {
-                simulation = ser.deserialize(selectedFile);
-                //add back the previous observers, they are needed for the UI !
-                //TODO still completely screwed, GameUI was built using other simulation, uses all that shit
-                //need to figure something out
-                for (SimulationObserver anObserver : currentObservers) {
-                    simulation.addObserver(anObserver);
-                }
+                loadedSimulation = ser.deserialize(selectedFile);
                 
+                // In current implementation, all simulations are the same size but check to make sure
+                if(loadedSimulation.getCurrentField().getDimX() == simulation.getCurrentField().getDimX() && loadedSimulation.getCurrentField().getDimY() == simulation.getCurrentField().getDimY()){
+                    simulation.setCurrentField(loadedSimulation.getCurrentField());
+                }
 
             } catch (IOException e1) {
                 e1.printStackTrace();

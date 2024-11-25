@@ -27,8 +27,8 @@ public class GameUI extends JPanel implements SimulationObserver {
         this.simulation = simulation;
         this.cellSize = cellSize;
         this.currentField = simulation.getCurrentField();
-        this.rows = currentField.getDimX();
-        this.cols = currentField.getDimY();
+        this.rows = currentField.getDimY();
+        this.cols = currentField.getDimX();
 
         setPreferredSize(new Dimension(cols * cellSize, rows * cellSize));
         setBackground(Color.BLACK);
@@ -37,6 +37,7 @@ public class GameUI extends JPanel implements SimulationObserver {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                
                 handleCellClick(e.getX(), e.getY());
             }
         });
@@ -45,6 +46,11 @@ public class GameUI extends JPanel implements SimulationObserver {
         simulation.addObserver(this);
     }
 
+    // Update simulation field (new sim has been loaded)
+    public void changeSimulation(Simulation newSimulation){
+        simulation = newSimulation;
+        updateCellStates();
+    }
 
     
 
@@ -79,19 +85,33 @@ public class GameUI extends JPanel implements SimulationObserver {
                 }
                 break;
             case HEXAGON:
-                double hexHeight = Math.sqrt(3) / 2 * cellSize;
-                row = (int) (mouseY / hexHeight);
-                col = (int) (mouseX / (cellSize * 0.75));
-                if (col % 2 == 1 && mouseY % hexHeight < hexHeight / 2) {
+            double hexHeight = cellSize * Math.sqrt(3) / 2;
+            row = (int) (mouseY / hexHeight);
+            col = (int) (mouseX / (cellSize * 0.75));
+            double xOffset = mouseX - (col * cellSize * 0.75);
+            double yOffset = mouseY - (row * hexHeight);
+            if (col % 2 == 0) {
+                if (yOffset < (-hexHeight / cellSize) * xOffset + hexHeight) {
+                    row--;
+                    col--;
+                } else if (yOffset < (hexHeight / cellSize) * xOffset - hexHeight) {
                     row--;
                 }
-                break;
+            } else {
+                if (yOffset < (hexHeight / cellSize) * xOffset) {
+                    row--;
+                } else if (yOffset < (-hexHeight / cellSize) * xOffset + hexHeight) {
+                    col--;
+                }
+            }
+            break;
         }
 
         // Ensure the calculated row and col are within bounds
         if (row >= 0 && row < rows && col >= 0 && col < cols) {
-            Coordinates coords = new Coordinates(row, col);
+            Coordinates coords = new Coordinates(col, row);
             currentField.set(coords, !currentField.get(coords)); // Toggle cell state
+            System.out.println("click at " + coords.getX() + ";" + coords.getY());
             repaint();
         }
     }
@@ -104,7 +124,7 @@ public class GameUI extends JPanel implements SimulationObserver {
 
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < cols; col++) {
-                if (currentField.get(new Coordinates(row, col))) { // Draw only active cells
+                if (currentField.get(new Coordinates(col, row))) { // Draw only active cells
                     switch (simulation.getShape()) {
                         case SQUARE:
                             drawSquareCell(g2d, row, col);
@@ -150,15 +170,16 @@ public class GameUI extends JPanel implements SimulationObserver {
     }
     //TODO still a bit scuffed
     private void drawHexagonCell(Graphics2D g2d, int row, int col) {
-        int x = col * (int) (cellSize * 0.75); // Horizontal spacing
-        int y = row * (int) (cellSize * Math.sqrt(3) / 2); // Vertical spacing
-        if (col % 2 == 1) y += cellSize * Math.sqrt(3) / 4; // Offset for staggered rows
+        int hexaSize = cellSize * 3 / 2;
+        int x = col * hexaSize; // Horizontal spacing
+        int y = row * hexaSize; // Vertical spacing
+        if (col % 2 == 1) y += hexaSize * Math.sqrt(3) / 4; // Offset for staggered rows
 
         Polygon hexagon = new Polygon();
         for (int i = 0; i < 6; i++) {
-            double angle = Math.toRadians(60.0 * i);
-            int xOffset = (int) (x + cellSize * Math.cos(angle));
-            int yOffset = (int) (y + cellSize * Math.sin(angle));
+            double angle = Math.toRadians(60.0 * i + 30);
+            int xOffset = (int) (x + hexaSize * Math.cos(angle));
+            int yOffset = (int) (y + hexaSize * Math.sin(angle));
             hexagon.addPoint(xOffset, yOffset);
         }
         g2d.fillPolygon(hexagon);

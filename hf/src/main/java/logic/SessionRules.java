@@ -9,6 +9,10 @@ public class SessionRules {
     //possible shapes
     public enum shapeList {SQUARE, TRIANGLE, HEXAGON}
 
+    static final int DEFAULT_WIDTH = 100;
+    static final int DEFAULT_HEIGHT = 50;
+    
+
     shapeList cellShape;
     //population percentage
     int popPrecent;
@@ -35,8 +39,8 @@ public class SessionRules {
         gameRules = conway;
         cellShape = shapeList.SQUARE;
         popPrecent = 0;
-        dimX = 50;
-        dimY = 100;
+        dimX = DEFAULT_WIDTH;
+        dimY = DEFAULT_HEIGHT;
         
         
     }

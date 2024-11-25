@@ -45,7 +45,7 @@ public class Simulation {
                 }
                 tick();
                 try {
-                    Thread.sleep(100); // Adjust the sleep time as needed
+                    Thread.sleep(300); // Adjust the sleep time as needed
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }  
@@ -77,7 +77,6 @@ public class Simulation {
 
     //advance simulation by one step and notify observers
     void tick(){
-        System.out.println("tick "+ getShape());
         nextState();
         switchFields();
         notifyObservers();
@@ -133,6 +132,9 @@ public class Simulation {
                 livingNeighbors++;
             }
         }
+        if(livingNeighbors > 0){
+            //System.out.println("At " + coords.getX() + ";" + coords.getY() + " I have neighbors: " + livingNeighbors);
+        }
         //if overpopulated, the cell dies
         if(livingNeighbors > ruleset.getRule("maxLive")){
             return false;
@@ -168,14 +170,14 @@ public class Simulation {
                 //left and right
                 result.add(new Coordinates(coords.getX() - 1, coords.getY()));
                 result.add(new Coordinates(coords.getX() + 1, coords.getY()));
-                //odd rows are pointing up, even rows are pointing down
-                if(coords.getY() % 2 == 0){
-                    //below
-                    result.add(new Coordinates(coords.getX(), coords.getY() + 1));
+                //triangles are alternating facing up and down
+                if((coords.getY() + coords.getX()) % 2 != 0){
+                    // Points down, adjacent to one above it
+                    result.add(new Coordinates(coords.getX(), coords.getY() - 1));
 
                 }else{
-                    //above
-                    result.add(new Coordinates(coords.getX(), coords.getY() -1));
+                    // Point up, adjacent to one below it
+                    result.add(new Coordinates(coords.getX(), coords.getY() + 1));
 
                 }
                 break;

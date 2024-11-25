@@ -56,7 +56,7 @@ public class UIFrame {
 
         // Create a panel for the controls
         JPanel controlPanel = new JPanel();
-        controlPanel.setLayout(new GridLayout(2, 1)); // Divide into 2 rows for organization
+        controlPanel.setLayout(new GridLayout(3, 1)); // Divide into 3 rows for organization
 
         // Create the first row of controls
         JPanel topRow = new JPanel();
@@ -67,13 +67,7 @@ public class UIFrame {
         clearButton = new JButton("Clear");
         new ClearListener(simulation, clearButton);
 
-        simNameField = new JTextField(10); // 10 columns for width
-        saveSimButton = new JButton("Save");
-        new SimSaveListener(simulation, simNameField, saveSimButton, SIM_SAVEPATH);
-
-        simDropdown = new FileSelector(SIM_SAVEPATH);
-        loadSimButton = new JButton("Load");
-        new SimLoadListener(simulation, simDropdown, loadSimButton, SIM_SAVEPATH);
+        
 
         shapeList[] cellShape = {shapeList.SQUARE, shapeList.TRIANGLE, shapeList.HEXAGON};
         shapeDropdown = new JComboBox<>(cellShape);
@@ -88,13 +82,7 @@ public class UIFrame {
         topRow.add(startPauseButton);
         topRow.add(clearButton);
 
-        topRow.add(new JLabel("Load sim:"));
-        topRow.add(simDropdown);
-        topRow.add(loadSimButton);
-
-        topRow.add(new JLabel("Save as:"));
-        topRow.add(simNameField);
-        topRow.add(saveSimButton);
+        
 
         topRow.add(new JLabel("Cell shape:"));
         topRow.add(shapeDropdown);
@@ -106,8 +94,8 @@ public class UIFrame {
         
 
         // Create the second row of controls
-        JPanel bottomRow = new JPanel();
-        bottomRow.setLayout(new FlowLayout(FlowLayout.CENTER));
+        JPanel middleRow = new JPanel();
+        middleRow.setLayout(new FlowLayout(FlowLayout.CENTER));
 
         minLiveSpinner = new JSpinner(new SpinnerNumberModel(1, 0, 10, 1)); // min=0, max=10, step=1
         maxLiveSpinner = new JSpinner(new SpinnerNumberModel(3, 0, 10, 1));
@@ -119,26 +107,54 @@ public class UIFrame {
         loadRulesButton = new JButton("Load");
         new RuleLoadListener(simulation, presetDropdown, minLiveSpinner, maxLiveSpinner, spawnSpinner, loadRulesButton, RULE_SAVEPATH);
         
+        
+
+        middleRow.add(new JLabel("Preset:"));
+        middleRow.add(presetDropdown);
+        middleRow.add(loadRulesButton);
+        middleRow.add(new JLabel("Min Live:"));
+        middleRow.add(minLiveSpinner);
+        middleRow.add(new JLabel("Max Live:"));
+        middleRow.add(maxLiveSpinner);
+        middleRow.add(new JLabel("Spawn:"));
+        middleRow.add(spawnSpinner);
+        middleRow.add(applyRulesButton);
+        
+        
+
+        // Create third row for save/load functionality
+        JPanel bottomRow = new JPanel();
+        bottomRow.setLayout(new FlowLayout(FlowLayout.CENTER));
+
+        simNameField = new JTextField(10); // 10 columns for width
+        saveSimButton = new JButton("Save");
+        new SimSaveListener(simulation, simNameField, saveSimButton, SIM_SAVEPATH);
+
+        simDropdown = new FileSelector(SIM_SAVEPATH);
+        loadSimButton = new JButton("Load");
+        new SimLoadListener(simulation, simDropdown, loadSimButton, SIM_SAVEPATH);
+
         presetNameField = new JTextField(10);
-        saveRulesButton = new JButton("Save ruleset");
+        saveRulesButton = new JButton("Save");
         new RuleSaveListener(simulation, presetNameField, saveRulesButton, RULE_SAVEPATH);
 
-        bottomRow.add(new JLabel("Preset:"));
-        bottomRow.add(presetDropdown);
-        bottomRow.add(loadRulesButton);
-        bottomRow.add(new JLabel("Min Live:"));
-        bottomRow.add(minLiveSpinner);
-        bottomRow.add(new JLabel("Max Live:"));
-        bottomRow.add(maxLiveSpinner);
-        bottomRow.add(new JLabel("Spawn:"));
-        bottomRow.add(spawnSpinner);
-        bottomRow.add(applyRulesButton);
-        
+        bottomRow.add(new JLabel("Load sim:"));
+        bottomRow.add(simDropdown);
+        bottomRow.add(loadSimButton);
+
+        bottomRow.add(new JLabel("Save sim:"));
+        bottomRow.add(simNameField);
+        bottomRow.add(saveSimButton);
+
+        bottomRow.add(new JLabel("Save ruleset:"));
         bottomRow.add(presetNameField);
         bottomRow.add(saveRulesButton);
 
+
+
         // Add the rows to the control panel
         controlPanel.add(topRow);
+        controlPanel.add(middleRow);
         controlPanel.add(bottomRow);
 
         // Create a panel for the game board
