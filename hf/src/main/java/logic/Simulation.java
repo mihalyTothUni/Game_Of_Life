@@ -8,19 +8,25 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import logic.SessionRules.shapeList;
 
+/**
+ * Simulation class, contains the game field and ruleset
+ * Runs the simulation
+ */
 public class Simulation {
-    static final int TICKSPEED = 10;
-    GameField currentField;
-    GameField nextField;
-    SessionRules ruleset;
-    volatile boolean running = false;
-    Thread thread;
+    static final int TICK_SPEED = 10;        // Ticks per second
+    private GameField currentField;         // Current state of the field
+    private GameField nextField;            // Next state of the field
+    private SessionRules ruleset;           // Ruleset for the simulation
+    private volatile boolean running = false;   // Is the simulation running
+    private Thread thread;                  // Thread for running the simulation
     @JsonIgnore
-    private List<SimulationObserver> observers;
+    private List<SimulationObserver> observers; // List of observers watching the simulation
 
-    //sets up the simulation based on the provided rules
+    /**
+     * Constructor for Simulation
+     * @param rules ruleset for the simulation
+     */
     public Simulation(SessionRules rules){
-        
         ruleset = rules;
         if(ruleset.popPrecent == 0){
             currentField = new GameField(ruleset.dimX, ruleset.dimY);
@@ -32,7 +38,7 @@ public class Simulation {
         
         observers = new ArrayList<>();
 
-        //thread for running the simulation, will be paused until start() is called
+        // Thread for running the simulation, will be paused until start() is called
         thread = new Thread(() -> {
             while(true){
               synchronized (this) {
@@ -46,7 +52,7 @@ public class Simulation {
                 }
                 tick();
                 try {
-                    Thread.sleep(1000 / TICKSPEED);
+                    Thread.sleep(1000 / TICK_SPEED);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }  
@@ -58,8 +64,10 @@ public class Simulation {
         thread.start();
     }
 
-    //calculate next state of entire field
-    void nextState(){
+    /**
+     * Calculate the next state of the field
+     */
+    private void nextState(){
         for(int x = 0; x < currentField.dimX; x++){
             for (int y = 0; y < currentField.dimY; y++){
                 Coordinates currentCell = new Coordinates(x, y);
@@ -69,109 +77,139 @@ public class Simulation {
         }
     }
 
-    //switch current and active field
-    void switchFields(){
+    /**
+     * Switch the current and next fields
+     */
+    private void switchFields(){
         GameField tmp = currentField;
         currentField = nextField;
         nextField = tmp;
     }
 
-    //advance simulation by one step and notify observers
-    void tick(){
+    /**
+     * Advance the simulation by one tick
+     */
+    private void tick(){
         nextState();
         switchFields();
         notifyObservers();
     }
 
-
-    // Ensure observers list is initialized
+    /**
+     * Ensure that the observers list is initialized
+     * Avoids null pointer exceptions
+     */
     private void ensureObserversInitialized() {
         if (observers == null) {
             observers = new ArrayList<>();
+        }
     }
-}
 
-    //add an observer to the simulation
+    /**
+     * Add an observer to the simulation
+     * @param observer observer to add
+     */
     public void addObserver(SimulationObserver observer){
         ensureObserversInitialized();
         observers.add(observer);
         notifyObservers();
     }
 
-    void notifyObservers(){
+    /**
+     * Notify all observers of a simulation tick
+     */
+    private void notifyObservers(){
         ensureObserversInitialized();
         for(SimulationObserver observer : observers){
             observer.onSimulationTick();
         }
     }
 
-    //start simulation thread
+    /**
+     * Start the simulation
+     */
     public synchronized void  start(){
         running = true;
         notifyAll();        
     }
 
-    //pause simulation (will halt at next tick)
+    /**
+     * Pause the simulation
+     * Will halt at the next tick
+     */
     public synchronized void pause(){
         running = false;
         
     }
 
-    //check if simulation is running
+    /**
+     * Check if the simulation is running
+     * @return true if the simulation is currently running
+     */
     public boolean isRunning(){
         return running;
     }
 
 
-    //function for calculating a cells state in the next turn
-    boolean calculateAlive(Coordinates coords){
+    /**
+     * Calculate if a cell will be alive in the next turn
+     * @param coords coordinates of the cell
+     * @return true if the cell will be alive
+     */
+    private boolean calculateAlive(Coordinates coords){
         int livingNeighbors = 0;
-        //count living neighbors of cell
+        // Count living neighbors of cell
         List<Coordinates> neighbors = findNeighbors(coords);
         for (Coordinates coordinates : neighbors) {
             if(currentField.get(coordinates)){
                 livingNeighbors++;
             }
         }
-        if(livingNeighbors > 0){
-            //System.out.println("At " + coords.getX() + ";" + coords.getY() + " I have neighbors: " + livingNeighbors);
-        }
-        //if overpopulated, the cell dies
+        // If overpopulated, the cell dies
         if(livingNeighbors > ruleset.getRule("maxLive")){
             return false;
         }
-        //if underpopulated, the cell dies
+        // If underpopulated, the cell dies
         if(livingNeighbors < ruleset.getRule("minLive")){
             return false;
         }
-        //now cell is surely between minLive and maxLive
-        //if it is alive, it will stay alive
+        
+        /**
+         * Now cell is surely between minLive and maxLive
+         * If it is alive, it will stay alive
+         */
         if(currentField.get(coords)){
             return true;
         }
-        //if it wasnt alive, but meets spawn criteria, it becomes alive 
+        // If it wasnt alive, but meets spawn criteria, it spawns 
         if(livingNeighbors >= ruleset.getRule("spawn")){
             return true;
         }
 
-        //if it wasnt alive and doesnt spawn, it stays dead
+        // If it wasnt alive and doesnt spawn, it stays dead
         return false;
     }    
 
 
     //puts all coordinates of neighbors in a list
     //even some invalid ones, but those will count as dead anyway
-    List<Coordinates> findNeighbors(Coordinates coords){
+    /**
+     * Find all neighbors of a cell by its coordinates
+     * @param coords coordinates of the cell in question
+     * @return list of coordinates of all neighbors
+     */
+    private List<Coordinates> findNeighbors(Coordinates coords){
         ArrayList<Coordinates> result = new ArrayList<>();
 
         switch (ruleset.getShape()) {
             case TRIANGLE:
-                //only cells with adjacent edges count, not diagonal ones
+                // Only cells with adjacent edges count as neighbors
                 
-                //left and right
+                // Left and right
                 result.add(new Coordinates(coords.getX() - 1, coords.getY()));
                 result.add(new Coordinates(coords.getX() + 1, coords.getY()));
-                //triangles are alternating facing up and down
+
+                // Triangles are alternating facing up and down
                 boolean isUpward = (coords.getY() + coords.getX()) % 2 != 0;
                 if(isUpward){
                     // Points up, adjacent to one below it
@@ -186,12 +224,12 @@ public class Simulation {
                 // Odd rows are shifted half a hexagon to the right and then mapped to grid
                 // Only counting neighbors by adjacent edges here, too
                 
-                //common neighbors
+                // Common neighbors
                 result.add(new Coordinates(coords.getX(), coords.getY() - 1));
                 result.add(new Coordinates(coords.getX(), coords.getY() + 1));
                 result.add(new Coordinates(coords.getX() - 1, coords.getY()));
                 result.add(new Coordinates(coords.getX() + 1, coords.getY()));
-                //even-odd neighbors
+                // Even-odd neighbors
                 if(coords.getY() % 2 == 0){
                     result.add(new Coordinates(coords.getX() - 1, coords.getY() - 1));
                     result.add(new Coordinates(coords.getX() - 1, coords.getY() + 1));
@@ -201,9 +239,8 @@ public class Simulation {
                 }
                 break;
 
-            //defaults to SQUARE cells
-            default:
-                //all neighbors with adjacent vertices
+            case SQUARE:
+                // All neighbors with adjacent vertices (classic Conway style)
                 result.add(new Coordinates(coords.getX(), coords.getY() - 1));
                 result.add(new Coordinates(coords.getX() + 1, coords.getY() - 1));
                 result.add(new Coordinates(coords.getX() + 1, coords.getY()));
@@ -219,7 +256,37 @@ public class Simulation {
         return result;
     }
 
-    // Default constructor for Jackson
+    /**
+     * Clear the current and next fields
+     */
+    public void clear() {
+        currentField.clear();
+        nextField.clear();
+        notifyObservers();
+    }
+    /**
+     * Set the cell shape
+     * @param selectedShape the shape to set
+     */
+    public void setShape(shapeList selectedShape) {
+        ruleset.cellShape = selectedShape;
+        // Notify observers of change
+        notifyObservers();
+    }
+    /**
+     * Get the current shape of the cells
+     * @return the current shape
+     */
+    public shapeList getShape() {
+        return ruleset.cellShape;
+    }
+
+    // Getters and Setters for Jackson framework from here on
+
+    /**
+     * Default constructor for Simulation
+     * Used for Jackson deserialization
+     */
     public Simulation() {
         observers = new ArrayList<>();
         thread = new Thread(() -> {
@@ -235,7 +302,7 @@ public class Simulation {
                 }
                 tick();
                 try {
-                    Thread.sleep(100); // Adjust the sleep time as needed
+                    Thread.sleep(1000 / TICK_SPEED);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }  
@@ -246,49 +313,55 @@ public class Simulation {
 
         thread.start();
     }
-    // Getters and Setters for Jackson
+
+
+    /**
+     * Get the current field
+     * @return current field
+     */
     public GameField getCurrentField() {
         return currentField;
     }
-    //Random populater method uses this too
+    /**
+     * Set the current field
+     * @param currentField the field to set as current
+     */
     public void setCurrentField(GameField currentField) {
         this.currentField = currentField;
         notifyObservers();
     }
-
+    /**
+     * Get the next field
+     * @return next field
+     */
     public GameField getNextField() {
         return nextField;
     }
-
+    /**
+     * Set the next field
+     * @param nextField the field to set as next
+     */
     public void setNextField(GameField nextField) {
         this.nextField = nextField;
     }
-
+    /**
+     * Get the ruleset
+     * @return ruleset
+     */
     public SessionRules getRuleset() {
         return ruleset;
     }
-
+    /**
+     * Set the ruleset
+     * @param ruleset the ruleset to set
+     */
     public void setRuleset(SessionRules ruleset) {
         this.ruleset = ruleset;
     }
-    //clears both current and next field
-    public void clear() {
-        currentField.clear();
-        nextField.clear();
-        
-        notifyObservers();
-    }
-    //set the cell shape
-	public void setShape(shapeList selectedShape) {
-        ruleset.cellShape = selectedShape;
-        //notify observers of change
-        notifyObservers();
-    }
-    //get the cell shape
-    public shapeList getShape() {
-        return ruleset.cellShape;
-    }
-    //get the current observers
+    /**
+     * Get the current observers
+     * @return list of observers
+     */
     public List<SimulationObserver> getObservers() {
         return observers;
     }

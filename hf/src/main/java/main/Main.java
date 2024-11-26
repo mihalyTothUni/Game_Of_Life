@@ -1,28 +1,18 @@
 package main;
 
-import java.io.IOException;
-
-
-import io.*;
 import logic.*;
 import userinterface.*;
 
-
 public class Main {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
+        /**
+         * Main class for the program
+         * Simply creates a new simulation and a new UI frame for it
+         */
+
         Simulation sim1 = new Simulation(new SessionRules());
-
-        
-
-
         UIFrame frame = new UIFrame(sim1);
-
-
-
         
-
-        //TODO hexagons are completely screwed
-        //they aint even pointy up like they should be yes they are
 
         //TODO refactor to javadoc and cleaner code
         

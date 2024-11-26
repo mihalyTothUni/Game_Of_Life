@@ -1,21 +1,32 @@
 package logic;
 
-//stores if it is alive or dead
+/**
+ * Cell class for the Game of Life simulation
+ * Stores the state of a cell (alive or dead)
+ */
 public class Cell {
-    boolean isAlive;
+    private boolean isAlive;
 
-    //basic constructor where state can be defined
+    /**
+     * Constructor for Cell class
+     * @param alive boolean value for the state of the cell
+     */
     public Cell(boolean alive){
         isAlive = alive;
     }
 
-    //parameterless constructor, defaults to dead state
+    /**
+     * Default constructor for Cell class
+     * Initializes cell as dead
+     */
     public Cell(){
         this(false);
     }
 
-    //constructor with randomized state
-    //has percentage chance to be alive (0-100)
+    /**
+     * Constructor for Cell class with randomized state
+     * @param percentage int value for the chance of the cell being alive (0-100)
+     */
     public Cell(int percentage){
         if (percentage < 0 || percentage > 100) {
             throw new IllegalArgumentException("Percentage must be between 0 and 100");
@@ -23,12 +34,18 @@ public class Cell {
         isAlive = Math.random() * 100 < percentage;
     }
     
-    //state getter
+    /**
+     * Returns the state of the cell
+     * @return boolean value for the state of the cell
+     */
     public boolean isAlive(){
         return isAlive;
     }
 
-    //state setter
+    /**
+     * Sets the state of the cell
+     * @param state boolean value to set
+     */
     public void setAlive(boolean state){
         isAlive = state;
     }

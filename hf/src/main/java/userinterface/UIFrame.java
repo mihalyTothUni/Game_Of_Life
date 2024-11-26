@@ -8,46 +8,46 @@ import userinterface.listeners.*;
 
 import java.awt.*;
 
+/**
+ * The main UI frame for the application
+ */
 public class UIFrame {
+    Simulation simulation; // The simulation to be displayed
 
-    Simulation simulation;
+    JButton startPauseButton;   // Button to start/pause the simulation
+    JButton clearButton;        // Button to clear the simulation
+    JButton saveSimButton;      // Button to save the simulation
+    JButton loadSimButton;      // Button to load the simulation
+    JButton setShapeButton;     // Button to set the shape of the cells
+    JButton populateButton;     // Button to populate the simulation
 
-    JButton startPauseButton;
-    JButton clearButton;
+    JButton applyRulesButton;   // Button to apply the selected rules to the simulation
+    JButton saveRulesButton;    // Button to save the rules
+    JButton loadRulesButton;    // Button to load the rules
 
-    JButton saveSimButton;
-    JButton loadSimButton;
+    JTextField presetNameField; // Field to enter the name of the ruleset
+    JTextField simNameField;    // Field to enter the name of the simulation
 
-    JButton setShapeButton;
-    JButton populateButton;
-
-    JButton applyRulesButton;
-    JButton saveRulesButton;
-    JButton loadRulesButton;
-
+    JComboBox<shapeList> shapeDropdown; // Dropdown menu for the cell shape
+    FileSelector presetDropdown;        // "Smart" dropdown menu for the rulesets
+    FileSelector simDropdown;           // "Smart" dropdown menu for the simulations
     
-    JTextField presetNameField;
-    JTextField simNameField;
-
-    JComboBox<shapeList> shapeDropdown;
-
-    FileSelector presetDropdown;
-    FileSelector simDropdown;
+    JSpinner popDensitySpinner;         // Spinner for the population density
+    JSpinner minLiveSpinner;            // Spinner for the minimum number of live neighbors
+    JSpinner maxLiveSpinner;            // Spinner for the maximum number of live neighbors
+    JSpinner spawnSpinner;              // Spinner for the number of neighbors required for spawn
     
-    JSpinner popDensitySpinner;
-    JSpinner minLiveSpinner;
-    JSpinner maxLiveSpinner;
-    JSpinner spawnSpinner;
+    static final String SIM_SAVEPATH = "hf/resources/simulations/"; // Path to save simulations
+    static final String RULE_SAVEPATH = "hf/resources/rules/";      // Path to save rulesets
+    static final int CELL_SIZE = 10;                                // Size of the cells in pixels
     
-    
-        
-    static final String SIM_SAVEPATH = "hf/resources/simulations/";
-    static final String RULE_SAVEPATH = "hf/resources/rules/";
-    static final int CELL_SIZE = 10;
-    
-    
+    /**
+     * Constructor
+     * @param width the width of the frame
+     * @param height the height of the frame
+     * @param simulation the simulation to be displayed
+     */
     public UIFrame(int width, int height, Simulation simulation){
-    
         this.simulation = simulation;
         // Create the main frame
         JFrame frame = new JFrame("Game of Life");
@@ -63,13 +63,13 @@ public class UIFrame {
         JPanel topRow = new JPanel();
         topRow.setLayout(new FlowLayout(FlowLayout.CENTER));
 
+        // Start/Pause and Clear buttons
         startPauseButton = new JButton("Start");
         new StartPauseListener(simulation, startPauseButton);
         clearButton = new JButton("Clear");
         new ClearListener(simulation, clearButton);
 
-        
-
+        // Cell shape and population density controls
         shapeList[] cellShape = {shapeList.SQUARE, shapeList.TRIANGLE, shapeList.HEXAGON};
         shapeDropdown = new JComboBox<>(cellShape);
         setShapeButton = new JButton("Set");
@@ -83,8 +83,6 @@ public class UIFrame {
         topRow.add(startPauseButton);
         topRow.add(clearButton);
 
-        
-
         topRow.add(new JLabel("Cell shape:"));
         topRow.add(shapeDropdown);
         topRow.add(setShapeButton);
@@ -92,24 +90,24 @@ public class UIFrame {
         topRow.add(new JLabel("Density:"));
         topRow.add(popDensitySpinner);
         topRow.add(populateButton);
-        
 
+        
         // Create the second row of controls
         JPanel middleRow = new JPanel();
         middleRow.setLayout(new FlowLayout(FlowLayout.CENTER));
 
-        minLiveSpinner = new JSpinner(new SpinnerNumberModel(1, 0, 10, 1)); // min=0, max=10, step=1
+        // Ruleset controls
+        minLiveSpinner = new JSpinner(new SpinnerNumberModel(1, 0, 10, 1)); // min=0, max=10, step=1, initial=1
         maxLiveSpinner = new JSpinner(new SpinnerNumberModel(3, 0, 10, 1));
-        spawnSpinner = new JSpinner(new SpinnerNumberModel(2, 0, 10, 1));
+        spawnSpinner = new JSpinner(new SpinnerNumberModel(3, 0, 10, 1));
         applyRulesButton = new JButton("Apply");
         new SetRulesListener(simulation, minLiveSpinner, maxLiveSpinner, spawnSpinner, applyRulesButton);
-        
+        // Load ruleset controls
         presetDropdown = new FileSelector(RULE_SAVEPATH);
         loadRulesButton = new JButton("Load");
         new RuleLoadListener(simulation, presetDropdown, minLiveSpinner, maxLiveSpinner, spawnSpinner, loadRulesButton, RULE_SAVEPATH);
         
-        
-
+        //Adding previously created elements to UI
         middleRow.add(new JLabel("Preset:"));
         middleRow.add(presetDropdown);
         middleRow.add(loadRulesButton);
@@ -121,12 +119,12 @@ public class UIFrame {
         middleRow.add(spawnSpinner);
         middleRow.add(applyRulesButton);
         
-        
 
         // Create third row for save/load functionality
         JPanel bottomRow = new JPanel();
         bottomRow.setLayout(new FlowLayout(FlowLayout.CENTER));
 
+        // Save/load simulation and ruleset controls
         simNameField = new JTextField(10); // 10 columns for width
         saveSimButton = new JButton("Save");
         new SimSaveListener(simulation, simNameField, saveSimButton, SIM_SAVEPATH);
@@ -139,6 +137,7 @@ public class UIFrame {
         saveRulesButton = new JButton("Save");
         new RuleSaveListener(simulation, presetNameField, saveRulesButton, RULE_SAVEPATH);
 
+        // Adding previously created elements to UI
         bottomRow.add(new JLabel("Load sim:"));
         bottomRow.add(simDropdown);
         bottomRow.add(loadSimButton);
@@ -151,8 +150,6 @@ public class UIFrame {
         bottomRow.add(presetNameField);
         bottomRow.add(saveRulesButton);
 
-
-
         // Add the rows to the control panel
         controlPanel.add(topRow);
         controlPanel.add(middleRow);
@@ -163,7 +160,6 @@ public class UIFrame {
         gameBoard.setBackground(Color.BLACK);
         gameBoard.setLayout(new BorderLayout());
 
-
         // Add the panels to the frame
         frame.add(controlPanel, BorderLayout.NORTH);
         frame.add(gameBoard, BorderLayout.CENTER);
@@ -172,9 +168,14 @@ public class UIFrame {
         frame.setVisible(true);
     }
 
-    //defaults to 1000x650 pixels
+    //defaults to 1000x700 pixels
+    /**
+     * Constructor
+     * @param simulation the simulation to be displayed
+     * Default size is 1000x700 pixels
+     */
     public UIFrame(Simulation simulation) {
-        this(1000, 650, simulation);
+        this(1000, 700, simulation);
     }
 }
 

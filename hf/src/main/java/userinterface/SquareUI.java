@@ -1,19 +1,26 @@
 package userinterface;
 
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import javax.swing.*;
 
 import logic.Coordinates;
 import logic.GameField;
 
+/**
+ * Class for drawing a clickable square grid
+ */
 public class SquareUI extends JPanel {
-    int cellSize; // Size of square side
-    int cols;    // Number of columns
-    int rows;    // Number of rows
+    private int cellSize; // Size of square side
+    private int cols;    // Number of columns
+    private int rows;    // Number of rows
     private Rectangle[][] squares; // Store the squares for easy access
 
+    /**
+     * Constructor
+     * @param rows  number of rows
+     * @param cols  number of columns
+     * @param cellSize size of each cell
+     */
     public SquareUI(int rows, int cols, int cellSize) {
         this.cellSize = cellSize;
         this.rows = rows;
@@ -22,7 +29,9 @@ public class SquareUI extends JPanel {
         createSquareGrid();
     }
 
-    // Create squares based on grid layout
+    /**
+     * Create squares based on grid layout
+     */
     private void createSquareGrid() {
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < cols; col++) {
@@ -33,7 +42,11 @@ public class SquareUI extends JPanel {
         }
     }
 
-    // Draws the field onto this grid
+    /**
+     * Draw the grid of cells based on the field
+     * @param g   the graphics object to paint with
+     * @param field the field to draw
+     */
     public void drawGrid(Graphics g, GameField field) {
         for (int x = 0; x < cols; x++) {
             for (int y = 0; y < rows; y++) {
@@ -47,17 +60,20 @@ public class SquareUI extends JPanel {
         }
     }
 
-    // Click detection to pass back to GameUI
+    /**
+     * Detect which square was clicked
+     * @param point the point that was clicked
+     * @return the coordinates of the square that was clicked
+     */
     public Coordinates detectCellClick(Point point) {
         int col = point.x / cellSize;
         int row = point.y / cellSize;
         return new Coordinates(col, row);
     }
 
-
     @Override
     protected void paintComponent(Graphics g) {
-        //not needed
+        // Not used
     }
 
 }

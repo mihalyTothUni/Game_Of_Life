@@ -14,18 +14,30 @@ import logic.Simulation;
 import logic.SimulationObserver;
 
 //GameUI class for the user interface of the actual cell grid
+/**
+ * Class for the user interface of the actual cell grid
+ * This class is responsible for drawing the grid and handling clicks
+ * It also observes the simulation to update the grid when the simulation ticks
+ * It is a JPanel, so it can be added to a JFrame
+ * It is also a SimulationObserver, so it can be notified when the simulation ticks
+ */
 @JsonIgnoreType
 public class GameUI extends JPanel implements SimulationObserver {
-    Simulation simulation; // The simulation we are drawing
-    int rows; // Number of rows
-    int cols; // Number of columns
-    int cellSize; // Size of each cell
-    GameField currentField; // The field we want to draw
+    private Simulation simulation;  // The simulation we are drawing
+    private int rows;               // Number of rows
+    private int cols;               // Number of columns
+    private int cellSize;           // Size of each cell
+    private GameField currentField; // The field we want to draw
 
-    HexUI hexManager; // Helper class because hexagons are hard
-    SquareUI squareManager;  // Turns out squares aren't easy either
-    TriUI triManager;   // Dont get me started on these things
+    private HexUI hexManager;       // Helper class because hexagons are hard
+    private SquareUI squareManager; // Turns out squares aren't easy either
+    private TriUI triManager;       // Dont get me started on these things
 
+    /**
+     * Constructor
+     * @param simulation the simulation to draw
+     * @param  cellSize the size of each cell
+     */
     public GameUI(Simulation simulation, int cellSize) {
         this.simulation = simulation;
         this.cellSize = cellSize;
@@ -33,6 +45,7 @@ public class GameUI extends JPanel implements SimulationObserver {
         this.rows = currentField.getDimY();
         this.cols = currentField.getDimX();
 
+        // Initialize the grid managers
         squareManager = new SquareUI(rows, cols, cellSize);
         triManager = new TriUI(rows, cols, cellSize);
         hexManager = new HexUI(rows, cols, cellSize);
@@ -47,34 +60,39 @@ public class GameUI extends JPanel implements SimulationObserver {
             }
         });
 
-        //Add itself to observers
+        // Add itself to observer list
         simulation.addObserver(this);
     }
 
-    // Update simulation field (new sim has been loaded)
-    public void changeSimulation(Simulation newSimulation){
-        simulation = newSimulation;
-        updateCellStates();
-    }
-
     
-
-    // Update cell states and repaint
+    /**
+     * Update cell states and repaint
+     */
     public void updateCellStates() {
         this.currentField = simulation.getCurrentField();
         repaint();
     }
     
-    //When we observe a change, show it in the editor
+    /**
+     * Called when the simulation ticks
+     * Updates the cell states and repaints the grid
+     */
     public void onSimulationTick() {
         updateCellStates();
     }
 
     // Handle cell clicks
+    /**
+     * Handle cell clicks
+     * @param point the point where the click occurred
+     * Calculates the row and column of the cell that was clicked,
+     * Toggles the state of the cell,
+     * Repaints the grid
+     */
     private void handleCellClick(Point point) {
         Coordinates selection = new Coordinates(-1, -1);
 
-        // Calculate row and col based on cell shape
+        // Calculate selected coordinates based on cell shape with helper classes
         switch (simulation.getShape()) {
             case SQUARE:
                 selection = squareManager.detectCellClick(point);
@@ -96,11 +114,15 @@ public class GameUI extends JPanel implements SimulationObserver {
         }
     }
 
+    /**
+     * Paint the grid
+     * @param g the graphics object to paint with
+     * Delegates the drawing to the appropriate grid manager
+     */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
-        g2d.setColor(Color.WHITE);
 
         switch (simulation.getShape()) {
             case SQUARE:
@@ -115,52 +137,4 @@ public class GameUI extends JPanel implements SimulationObserver {
         }
         
     }
-
-    private void drawSquareCell(Graphics2D g2d, int row, int col) {
-        int x = col * cellSize;
-        int y = row * cellSize;
-        g2d.fillRect(x, y, cellSize, cellSize);
-    }
-
-    private void drawTriangleCell(Graphics2D g2d, int row, int col) {
-        int x = col * cellSize;
-        int y = row * cellSize;
-        int halfSize = cellSize / 2;
-
-        Polygon triangle;
-        if ((row + col) % 2 == 0) { // Alternate upward and downward triangles
-            triangle = new Polygon(
-                new int[]{x, x + cellSize, x + halfSize},
-                new int[]{y + cellSize, y + cellSize, y},
-                3
-            );
-        } else {
-            triangle = new Polygon(
-                new int[]{x, x + cellSize, x + halfSize},
-                new int[]{y, y, y + cellSize},
-                3
-            );
-        }
-        g2d.fillPolygon(triangle);
-    }
-    //TODO still a bit scuffed
-    /* 
-    private void drawHexagonCell(Graphics2D g2d, int row, int col) {
-        int hexaSize = cellSize * 3 / 2;
-        int x = col * hexaSize; // Horizontal spacing
-        int y = row * hexaSize; // Vertical spacing
-        if (col % 2 == 1) y += hexaSize * Math.sqrt(3) / 4; // Offset for staggered rows
-
-        Polygon hexagon = new Polygon();
-        for (int i = 0; i < 6; i++) {
-            double angle = Math.toRadians(60.0 * i + 30);
-            int xOffset = (int) (x + hexaSize * Math.cos(angle));
-            int yOffset = (int) (y + hexaSize * Math.sin(angle));
-            hexagon.addPoint(xOffset, yOffset);
-        }
-        g2d.fillPolygon(hexagon);
-    }*/
-
-    
 }
-
