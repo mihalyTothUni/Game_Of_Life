@@ -12,3 +12,5 @@ Saved assets are stored under resources in the appropriate directory
 
 # Instructions
 UI is pretty self explanatory, make sure to hit "Load" after selecting a ruleset / sim as they are not loaded immediately upon selection
+
+I plan to add a simple click-and-run version, until that the vscode launch config is available for ease of use
