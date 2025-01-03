@@ -1,7 +1,5 @@
 # Project for BME programming 3
-Game of life with gui and customisable parameters
-
-This is a barebones second year CS project, treat it as such
+Game of life with a swing GUI and customisable parameters
 
 # Features
 Manage square, hexagonal and triangular cells
@@ -9,3 +7,8 @@ Manage square, hexagonal and triangular cells
 Load and store custom configurations
 
 Load and store snapshots of the field
+
+Saved assets are stored under resources in the appropriate directory
+
+# Instructions
+UI is pretty self explanatory, make sure to hit "Load" after selecting a ruleset / sim as they are not loaded immediately upon selection
